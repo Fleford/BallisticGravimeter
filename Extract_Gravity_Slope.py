@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 # noise = np.random.normal(scale=np.sqrt(noise_power), size=time.shape)
 # noise *= np.exp(-time/5)
 # x = carrier + noise
-x = np.loadtxt("freefall.txt")
+x = np.loadtxt("freefall_4.txt")
 print(x.shape)
 
 seg = 2**8
@@ -36,7 +36,7 @@ print()
 # Transform initial array
 print("Median:", np.median(ft_array))
 ft_array = ft_array / np.median(ft_array)
-ft_array = ft_array**2
+ft_array = ft_array**1
 
 # For each slice of the spectrogram,
 for ft_array_slice in ft_array:
