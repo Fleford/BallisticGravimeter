@@ -13,7 +13,7 @@ import math
 import time
 import matplotlib.pyplot as plt
 import sys
-import numpy
+import numpy as np
 
 if sys.platform.startswith("win"):
     dwf = cdll.dwf
@@ -90,7 +90,7 @@ dwf.FDwfAnalogOutRunSet(hdwf, channel, c_double(pulse)) # pulse length
 dwf.FDwfAnalogOutWaitSet(hdwf, channel, c_double(0)) # wait
 dwf.FDwfAnalogOutRepeatSet(hdwf, channel, c_int(1)) # repeat once
 
-for measure in range(100):
+for capture in range(100):
     print("Starting oscilloscope")
     dwf.FDwfAnalogInConfigure(hdwf, c_int(1), c_int(1))
 
@@ -114,13 +114,18 @@ for measure in range(100):
     dc = sum(rgdSamples)/len(rgdSamples)
     print("DC: "+str(dc)+"V")
 
-    test_array = numpy.fromiter(rgdSamples, dtype = numpy.float)
+    test_array = np.fromiter(rgdSamples, dtype = np.float)
+
+    savefilename = str('Captures/') + str(capture) + '.txt'
+
+    np.savetxt(savefilename, test_array, delimiter=',')
+
     print(test_array.shape)
-    plt.plot(numpy.fromiter(rgdSamples, dtype = numpy.float))
+    plt.plot(np.fromiter(rgdSamples, dtype = np.float))
     # plt.show()
 
     # Briefly show plot
-    plt.pause(0.1)
+    plt.pause(0.001)
     plt.clf()
 
 dwf.FDwfDeviceCloseAll()
