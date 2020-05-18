@@ -27,7 +27,7 @@ hdwf = c_int()
 sts = c_byte()
 rgdSamples = (c_double*16384)()
 channel = c_int(0)
-pulse = 400e-5
+pulse = 300e-5
 
 print("rgdSamples: ", rgdSamples)
 
@@ -70,6 +70,7 @@ dwf.FDwfAnalogInTriggerTypeSet(hdwf, trigtypeEdge)
 dwf.FDwfAnalogInTriggerChannelSet(hdwf, c_int(0)) # first channel
 dwf.FDwfAnalogInTriggerLevelSet(hdwf, c_double(0.5)) # 0.5V
 dwf.FDwfAnalogInTriggerConditionSet(hdwf, trigcondRisingPositive)
+dwf.FDwfAnalogInTriggerPositionSet(hdwf, c_double(0.020))
 
 # #wait at least 2 seconds for the offset to stabilize
 # time.sleep(2)
