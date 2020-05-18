@@ -14,8 +14,13 @@ import matplotlib.pyplot as plt
 # noise = np.random.normal(scale=np.sqrt(noise_power), size=time.shape)
 # noise *= np.exp(-time/5)
 # x = carrier + noise
-x = np.loadtxt("freefall_4.txt")
+
+# x = np.loadtxt("freefall_4.txt")
+x = np.loadtxt("Captures/12.txt")
 print(x.shape)
+
+# x = signal.resample(x, 2**14)
+# print(x.shape)
 
 seg = 2**8
 fs = 800000
@@ -41,10 +46,9 @@ ft_array = ft_array**1
 # For each slice of the spectrogram,
 for ft_array_slice in ft_array:
     # Take a slice
-    # ft_array_slice = ft_array[0]
-    # print(ft_array_slice.shape)
-    # plt.plot(ft_array_slice)
+    plt.plot(ft_array_slice)
     # plt.show()
+    plt.pause(0.1)
 
     index_array = np.arange(len(ft_array_slice))
     # print(index_array)
