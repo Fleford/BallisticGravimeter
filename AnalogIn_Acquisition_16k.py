@@ -28,6 +28,7 @@ sts = c_byte()
 rgdSamples = (c_double*16384)()
 channel = c_int(0)
 pulse = 300e-5
+secPosition = 0.021
 
 print("rgdSamples: ", rgdSamples)
 
@@ -70,7 +71,7 @@ dwf.FDwfAnalogInTriggerTypeSet(hdwf, trigtypeEdge)
 dwf.FDwfAnalogInTriggerChannelSet(hdwf, c_int(0)) # first channel
 dwf.FDwfAnalogInTriggerLevelSet(hdwf, c_double(0.5)) # 0.5V
 dwf.FDwfAnalogInTriggerConditionSet(hdwf, trigcondRisingPositive)
-dwf.FDwfAnalogInTriggerPositionSet(hdwf, c_double(0.020))
+dwf.FDwfAnalogInTriggerPositionSet(hdwf, c_double(secPosition))
 
 # #wait at least 2 seconds for the offset to stabilize
 # time.sleep(2)
@@ -89,31 +90,37 @@ dwf.FDwfAnalogOutRunSet(hdwf, channel, c_double(pulse)) # pulse length
 dwf.FDwfAnalogOutWaitSet(hdwf, channel, c_double(0)) # wait
 dwf.FDwfAnalogOutRepeatSet(hdwf, channel, c_int(1)) # repeat once
 
-print("Starting oscilloscope")
-dwf.FDwfAnalogInConfigure(hdwf, c_int(1), c_int(1))
+for measure in range(100):
+    print("Starting oscilloscope")
+    dwf.FDwfAnalogInConfigure(hdwf, c_int(1), c_int(1))
 
-time.sleep(0.1)
-print("Generating pulse")
-dwf.FDwfAnalogOutConfigure(hdwf, channel, c_bool(True))
+    # Wait for scope to be ready
+    time.sleep(0.0001)
 
-while True:
-    dwf.FDwfAnalogInStatus(hdwf, c_int(1), byref(sts))
-    if sts.value == DwfStateDone.value:
-        break
-    time.sleep(0.1)
-print("Acquisition done")
+    print("Generating pulse")
+    dwf.FDwfAnalogOutConfigure(hdwf, channel, c_bool(True))
 
-dwf.FDwfAnalogInStatusData(hdwf, 0, rgdSamples, 16384) # get channel 1 data
-#dwf.FDwfAnalogInStatusData(hdwf, 1, rgdSamples, 4000) # get channel 2 data
+    while True:
+        dwf.FDwfAnalogInStatus(hdwf, c_int(1), byref(sts))
+        if sts.value == DwfStateDone.value:
+            break
+        time.sleep(0.0001)
+    print("Acquisition done")
+
+    dwf.FDwfAnalogInStatusData(hdwf, 0, rgdSamples, 16384) # get channel 1 data
+
+
+    #plot window
+    dc = sum(rgdSamples)/len(rgdSamples)
+    print("DC: "+str(dc)+"V")
+
+    test_array = numpy.fromiter(rgdSamples, dtype = numpy.float)
+    print(test_array.shape)
+    plt.plot(numpy.fromiter(rgdSamples, dtype = numpy.float))
+    # plt.show()
+
+    # Briefly show plot
+    plt.pause(0.1)
+    plt.clf()
+
 dwf.FDwfDeviceCloseAll()
-
-#plot window
-dc = sum(rgdSamples)/len(rgdSamples)
-print("DC: "+str(dc)+"V")
-
-test_array = numpy.fromiter(rgdSamples, dtype = numpy.float)
-print(test_array.shape)
-plt.plot(numpy.fromiter(rgdSamples, dtype = numpy.float))
-plt.show()
-
-
