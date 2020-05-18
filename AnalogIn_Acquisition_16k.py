@@ -28,7 +28,7 @@ sts = c_byte()
 rgdSamples = (c_double*16384)()
 channel = c_int(0)
 pulse = 300e-5
-secPosition = 0.019
+secPosition = 0.0185
 
 print("rgdSamples: ", rgdSamples)
 
