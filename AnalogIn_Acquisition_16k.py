@@ -26,6 +26,8 @@ else:
 hdwf = c_int()
 sts = c_byte()
 rgdSamples = (c_double*16384)()
+channel = c_int(0)
+pulse = 400e-5
 
 print("rgdSamples: ", rgdSamples)
 
@@ -38,7 +40,7 @@ print("Opening first device")
 # dwf.FDwfDeviceOpen(c_int(-1), byref(hdwf))
 dwf.FDwfDeviceConfigOpen(c_int(-1), c_int(1), byref(hdwf))
 
-print("str(hdwf.value)", str(hdwf.value))
+print("hdwf.value", hdwf.value)
 
 if hdwf.value == hdwfNone.value:
     szerr = create_string_buffer(512)
@@ -53,17 +55,45 @@ dwf.FDwfAnalogInBufferSizeInfo(hdwf, 0, byref(cBufMax))
 print("Device buffer size: "+str(cBufMax.value)) 
 
 #set up acquisition
+print("Setting up acquisition")
 dwf.FDwfAnalogInFrequencySet(hdwf, c_double(800000.0))
 dwf.FDwfAnalogInBufferSizeSet(hdwf, c_int(16384))
 dwf.FDwfAnalogInChannelEnableSet(hdwf, c_int(-1), c_bool(True))
-dwf.FDwfAnalogInChannelRangeSet(hdwf, c_int(-1), c_double(5))
+dwf.FDwfAnalogInChannelRangeSet(hdwf, c_int(-1), c_double(0.2))
 dwf.FDwfAnalogInChannelFilterSet(hdwf, c_int(-1), filterDecimate)
 
-#wait at least 2 seconds for the offset to stabilize
-time.sleep(2)
+#set up trigger
+print("Setting up trigger")
+dwf.FDwfAnalogInTriggerAutoTimeoutSet(hdwf, c_double(0)) #disable auto trigger
+dwf.FDwfAnalogInTriggerSourceSet(hdwf, trigsrcExternal1) #one of the external channels
+dwf.FDwfAnalogInTriggerTypeSet(hdwf, trigtypeEdge)
+dwf.FDwfAnalogInTriggerChannelSet(hdwf, c_int(0)) # first channel
+dwf.FDwfAnalogInTriggerLevelSet(hdwf, c_double(0.5)) # 0.5V
+dwf.FDwfAnalogInTriggerConditionSet(hdwf, trigcondRisingPositive)
+
+# #wait at least 2 seconds for the offset to stabilize
+# time.sleep(2)
+
+# Set up pulse out
+print("Setting up analog out pulse")
+dwf.FDwfDeviceAutoConfigureSet(hdwf, c_int(0))
+
+dwf.FDwfAnalogOutNodeEnableSet(hdwf, channel, AnalogOutNodeCarrier, c_bool(True))
+dwf.FDwfAnalogOutIdleSet(hdwf, channel, DwfAnalogOutIdleOffset)
+dwf.FDwfAnalogOutNodeFunctionSet(hdwf, channel, AnalogOutNodeCarrier, funcSquare)
+dwf.FDwfAnalogOutNodeFrequencySet(hdwf, channel, AnalogOutNodeCarrier, c_double(0)) # low frequency
+dwf.FDwfAnalogOutNodeAmplitudeSet(hdwf, channel, AnalogOutNodeCarrier, c_double(5))
+dwf.FDwfAnalogOutNodeOffsetSet(hdwf, channel, AnalogOutNodeCarrier, c_double(0))
+dwf.FDwfAnalogOutRunSet(hdwf, channel, c_double(pulse)) # pulse length
+dwf.FDwfAnalogOutWaitSet(hdwf, channel, c_double(0)) # wait
+dwf.FDwfAnalogOutRepeatSet(hdwf, channel, c_int(1)) # repeat once
 
 print("Starting oscilloscope")
 dwf.FDwfAnalogInConfigure(hdwf, c_int(1), c_int(1))
+
+time.sleep(0.1)
+print("Generating pulse")
+dwf.FDwfAnalogOutConfigure(hdwf, channel, c_bool(True))
 
 while True:
     dwf.FDwfAnalogInStatus(hdwf, c_int(1), byref(sts))
