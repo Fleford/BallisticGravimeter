@@ -53,15 +53,20 @@ if hdwf.value == hdwfNone.value:
 cBufMax = c_int()
 dwf.FDwfAnalogInBufferSizeInfo(hdwf, 0, byref(cBufMax))
 
-print("Device buffer size: "+str(cBufMax.value)) 
+print("Device buffer size: "+str(cBufMax.value))
 
-#set up acquisition
+# set up acquisition
 print("Setting up acquisition")
+
 dwf.FDwfAnalogInFrequencySet(hdwf, c_double(800000.0))
 dwf.FDwfAnalogInBufferSizeSet(hdwf, c_int(16384))
 dwf.FDwfAnalogInChannelEnableSet(hdwf, c_int(-1), c_bool(True))
 dwf.FDwfAnalogInChannelRangeSet(hdwf, c_int(-1), c_double(0.2))
 dwf.FDwfAnalogInChannelFilterSet(hdwf, c_int(-1), filterDecimate)
+
+# Uncomment if 1MHz clock signal is attach to T2
+dwf.FDwfAnalogInSamplingSourceSet(hdwf, trigsrcExternal2)
+dwf.FDwfAnalogInFrequencySet(hdwf, c_double(1000000.0))
 
 #set up trigger
 print("Setting up trigger")
@@ -124,8 +129,8 @@ for capture in range(100):
     plt.plot(np.fromiter(rgdSamples, dtype = np.float))
     # plt.show()
 
-    # # Briefly show plot
-    # plt.pause(0.001)
-    # plt.clf()
+    # Briefly show plot
+    plt.pause(0.001)
+    plt.clf()
 
 dwf.FDwfDeviceCloseAll()
