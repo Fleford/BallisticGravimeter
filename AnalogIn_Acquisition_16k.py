@@ -124,8 +124,8 @@ for capture in range(100):
     plt.plot(np.fromiter(rgdSamples, dtype = np.float))
     # plt.show()
 
-    # Briefly show plot
-    plt.pause(0.001)
-    plt.clf()
+    # # Briefly show plot
+    # plt.pause(0.001)
+    # plt.clf()
 
 dwf.FDwfDeviceCloseAll()

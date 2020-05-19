@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 # x = carrier + noise
 
 # x = np.loadtxt("freefall_4.txt")
-x = np.loadtxt("Captures/12.txt")
+x = np.loadtxt("Captures_rapidfire/10.txt")
 print(x.shape)
 
 # x = signal.resample(x, 2**14)
