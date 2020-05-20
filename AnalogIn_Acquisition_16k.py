@@ -64,9 +64,9 @@ dwf.FDwfAnalogInChannelEnableSet(hdwf, c_int(-1), c_bool(True))
 dwf.FDwfAnalogInChannelRangeSet(hdwf, c_int(-1), c_double(0.2))
 dwf.FDwfAnalogInChannelFilterSet(hdwf, c_int(-1), filterDecimate)
 
-# Uncomment if 1MHz clock signal is attach to T2
-dwf.FDwfAnalogInSamplingSourceSet(hdwf, trigsrcExternal2)
-dwf.FDwfAnalogInFrequencySet(hdwf, c_double(1000000.0))
+# # Uncomment if 1MHz clock signal is attach to T2
+# dwf.FDwfAnalogInSamplingSourceSet(hdwf, trigsrcExternal2)
+# dwf.FDwfAnalogInFrequencySet(hdwf, c_double(1000000.0))
 
 #set up trigger
 print("Setting up trigger")
@@ -123,7 +123,7 @@ for capture in range(100):
 
     savefilename = str('Captures/') + str(capture) + '.txt'
 
-    np.savetxt(savefilename, test_array, delimiter=',')
+    # np.savetxt(savefilename, test_array, delimiter=',')
 
     print(test_array.shape)
     plt.plot(np.fromiter(rgdSamples, dtype = np.float))
