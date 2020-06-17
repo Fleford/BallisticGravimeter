@@ -17,12 +17,12 @@ import matplotlib.pyplot as plt
 
 # x = np.loadtxt("freefall_4.txt")
 # x = np.loadtxt("Captures_null/10.txt")
-x = np.loadtxt("Captures_5_18_2020/33.txt")
-# x = np.loadtxt("Captures_rapidfire/10.txt")
+# x = np.loadtxt("Captures_5_18_2020/26.txt")
+x = np.loadtxt("Captures_rapidfire/72.txt")
 # x = np.loadtxt("Captures_null_seismic/10.txt")
 print(x.shape)
 
-# x = signal.resample(x, 2**14)
+# x = signal.resample(x, len(x) * 2**0)
 # print(x.shape)
 
 seg = 2**8
@@ -46,47 +46,57 @@ print("Median:", np.median(ft_array))
 ft_array = ft_array / np.median(ft_array)
 ft_array = ft_array**1
 
+# Prepare an array of peak spacing
+peak_spacing_array = []
+
 # # For each slice of the spectrogram,
-# for ft_array_slice in ft_array:
-ft_array_slice = ft_array[90]
-# ft_array_slice = np.array([0, 0, 1, 2, 3, 4, 5, 4, 3, 2, 1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1])
+for ft_array_slice in ft_array:
+    # ft_array_slice = ft_array[30]
+    # ft_array_slice = np.array([0, 0, 1, 2, 3, 4, 5, 4, 3, 2, 1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1])
 
-# Take a slice
-plt.plot(ft_array_slice)
-plt.show()
-# plt.pause(0.1)
+    # Take a slice
+    plt.plot(ft_array_slice)
+    # plt.show()
+    plt.pause(0.1)
 
-index_array = np.arange(len(ft_array_slice))
-# print(index_array)
-# print(ft_array_slice)
+    index_array = np.arange(len(ft_array_slice))
+    # print(index_array)
+    # print(ft_array_slice)
 
-# Calculate center
-ft_index_array = ft_array_slice * index_array
-center = np.sum(ft_index_array) / np.sum(ft_array_slice)
-print("Center:", center)
+    # Calculate center
+    ft_index_array = ft_array_slice * index_array
+    center = np.sum(ft_index_array) / np.sum(ft_array_slice)
+    print("Center:", center)
 
-# Calculate width
-index_center_offset_array_sqrd = (index_array - center)**2
-ft_index_mean_offset_array = ft_array_slice * index_center_offset_array_sqrd
-width = np.sqrt(np.sum(ft_index_mean_offset_array) / np.sum(ft_array_slice)) * 2
-print("Width:", width)
+    # Calculate width
+    index_center_offset_array_sqrd = (index_array - center)**2
+    ft_index_mean_offset_array = ft_array_slice * index_center_offset_array_sqrd
+    width = np.sqrt(np.sum(ft_index_mean_offset_array) / np.sum(ft_array_slice)) * 2
+    print("Width:", width)
 
-# Cut array into two halves
+    # Cut array into two halves
+    print()
+    dividing_index = np.int(center)
+    print("Dividing index: ", np.int(center))
+    first_half = ft_array_slice[:dividing_index]
+    print("first half: ", first_half)
+    print("max index", np.argmax(first_half))
+    print("max val", first_half[np.argmax(first_half)])
+    second_half = ft_array_slice[dividing_index:]
+    print("second_half: ", second_half)
+    print("max index", np.argmax(second_half))
+    print("max val", second_half[np.argmax(second_half)])
+    peak_spacing = (len(first_half) - np.argmax(first_half)) + (np.argmax(second_half))
+    print("peak spacing: ", peak_spacing)
+
+    # Append result to array
+    peak_spacing_array.append(peak_spacing)
+
+# Report final result
+peak_spacing_array = np.asarray(peak_spacing_array)
 print()
-dividing_index = np.int(center)
-print("Dividing index: ", np.int(center))
-first_half = ft_array_slice[:dividing_index]
-print("first half: ", first_half)
-print("max index", np.argmax(first_half))
-print("max val", first_half[np.argmax(first_half)])
-second_half = ft_array_slice[dividing_index:]
-print("second_half: ", second_half)
-print("max index", np.argmax(second_half))
-print("max val", second_half[np.argmax(second_half)])
-peak_spacing = (len(first_half) - np.argmax(first_half)) + (np.argmax(second_half))
-print("peak spacing: ", peak_spacing)
-
-# Report values
-# print(width)
-
+print('peak_spacing_array')
+print(peak_spacing_array.shape)
+print(peak_spacing_array)
+np.savetxt('peak_spacing_list', peak_spacing_array)
 
