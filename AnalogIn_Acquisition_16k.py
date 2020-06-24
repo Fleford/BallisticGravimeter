@@ -28,7 +28,9 @@ sts = c_byte()
 rgdSamples = (c_double*16384)()
 channel = c_int(0)
 pulse = 300e-5
-secPosition = 0.02
+secPosition = 0.016
+# 0.015
+# 0.02
 
 print("rgdSamples: ", rgdSamples)
 
@@ -64,9 +66,9 @@ dwf.FDwfAnalogInChannelEnableSet(hdwf, c_int(-1), c_bool(True))
 dwf.FDwfAnalogInChannelRangeSet(hdwf, c_int(-1), c_double(0.2))
 dwf.FDwfAnalogInChannelFilterSet(hdwf, c_int(-1), filterDecimate)
 
-# # Uncomment if 1MHz clock signal is attach to T2
-# dwf.FDwfAnalogInSamplingSourceSet(hdwf, trigsrcExternal2)
-# dwf.FDwfAnalogInFrequencySet(hdwf, c_double(1000000.0))
+# Uncomment if 1MHz clock signal is attach to T2
+dwf.FDwfAnalogInSamplingSourceSet(hdwf, trigsrcExternal2)
+dwf.FDwfAnalogInFrequencySet(hdwf, c_double(1000000.0))
 
 #set up trigger
 print("Setting up trigger")
@@ -81,7 +83,7 @@ dwf.FDwfAnalogInTriggerPositionSet(hdwf, c_double(secPosition))
 # #wait at least 2 seconds for the offset to stabilize
 # time.sleep(2)
 
-# Set up pulse out
+# Set up pulse out (pulse sent out W1)
 print("Setting up analog out pulse")
 dwf.FDwfDeviceAutoConfigureSet(hdwf, c_int(0))
 
@@ -94,7 +96,7 @@ dwf.FDwfAnalogOutNodeOffsetSet(hdwf, channel, AnalogOutNodeCarrier, c_double(0))
 dwf.FDwfAnalogOutRunSet(hdwf, channel, c_double(pulse)) # pulse length
 dwf.FDwfAnalogOutWaitSet(hdwf, channel, c_double(0)) # wait
 dwf.FDwfAnalogOutRepeatSet(hdwf, channel, c_int(1)) # repeat once
-
+all_captures = []
 for capture in range(100):
     print("Starting oscilloscope")
     dwf.FDwfAnalogInConfigure(hdwf, c_int(1), c_int(1))
@@ -112,25 +114,29 @@ for capture in range(100):
         time.sleep(0.0001)
     print("Acquisition done")
 
-    dwf.FDwfAnalogInStatusData(hdwf, 0, rgdSamples, 16384) # get channel 1 data
+    dwf.FDwfAnalogInStatusData(hdwf, 0, rgdSamples, 16384)  # get channel 1 data
 
-
-    #plot window
+    # plot window
     dc = sum(rgdSamples)/len(rgdSamples)
     print("DC: "+str(dc)+"V")
 
     test_array = np.fromiter(rgdSamples, dtype = np.float)
-
-    savefilename = str('Captures/') + str(capture) + '.txt'
-
-    # np.savetxt(savefilename, test_array, delimiter=',')
+    all_captures.append(test_array)
 
     print(test_array.shape)
     plt.plot(np.fromiter(rgdSamples, dtype = np.float))
     # plt.show()
 
-    # Briefly show plot
-    plt.pause(0.001)
-    plt.clf()
+    # # # Briefly show plot
+    # plt.pause(0.001)
+    # plt.clf()
+    time.sleep(0.01)
+
+all_captures = np.array(all_captures)
+
+# savefilename = str('Captures/') + str(capture) + '.txt'
+# np.savetxt(savefilename, test_array, delimiter=',')
+
+np.savetxt("Capture.txt", all_captures, delimiter=',')
 
 dwf.FDwfDeviceCloseAll()

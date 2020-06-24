@@ -25,12 +25,10 @@ import matplotlib.pyplot as plt
 # Prepare an array of peak spacing
 peak_spacing_array = []
 
-for filename_index in range(0, 100):
-    folder = 'Captures'
-    filepath = folder + '/' + str(filename_index) + '.txt'
-    print(filepath)
-    x = np.loadtxt(filepath)
-    print(x.shape)
+all_captures = np.loadtxt('Capture.txt', delimiter=',')
+
+for x in all_captures:
+    print(x)
 
     # x = signal.resample(x, len(x) * 2**0)
     # print(x.shape)
@@ -45,9 +43,9 @@ for filename_index in range(0, 100):
     print(ft_array.shape)
     print(seg, len(t)*len(f))
     # np.savetxt("array.txt", ft_array * 1e9, delimiter="\t")
-    plt.pcolormesh(t, f, ft_array)
-    plt.ylabel('Frequency [Hz]')
-    plt.xlabel('Time [sec]')
+    # plt.pcolormesh(t, f, ft_array)
+    # plt.ylabel('Frequency [Hz]')
+    # plt.xlabel('Time [sec]')
     # plt.show()
     print()
 
@@ -110,8 +108,13 @@ for filename_index in range(0, 100):
 
 # Report final result
 peak_spacing_array = np.asarray(peak_spacing_array)
+mean_peak_spacing_array = np.mean(peak_spacing_array, axis=0)
+std_peak_spacing_array = np.std(peak_spacing_array, axis=0)
+cov_peak_spacing_array = std_peak_spacing_array / mean_peak_spacing_array
 print()
 print('peak_spacing_array')
 print(peak_spacing_array.shape)
 np.savetxt('peak_spacing_array.txt', peak_spacing_array)
 np.savetxt('peak_spacing_array_transpose.txt', np.transpose(peak_spacing_array))
+np.savetxt('mean_peak_spacing_array_transpose.txt', np.transpose(mean_peak_spacing_array))
+np.savetxt('cov_peak_spacing_array_transpose.txt', np.transpose(cov_peak_spacing_array))
